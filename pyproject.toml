@@ -1,0 +1,14 @@
+[project]
+name = "intel-dynamic-ontology-demo"
+version = "0.1.0"
+description = "Dynamic ontology construction demo for intelligence systems using KAG/OpenSPG-inspired workflows"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+intel-demo = "intel_ontology_demo.main:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
