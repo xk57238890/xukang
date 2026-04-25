@@ -9,6 +9,7 @@
   - `kag`：规则化、结构化抽取（模拟 KAG 风格）
   - `llm`：纯大模型抽取风格（示例用占位实现）
 - 支持 **本体层 + 实例层一起显示** 或 **分开显示**。
+- 提供 **前端界面（Streamlit）**，可视化操作本体编辑、抽取入图、图谱查看。
 
 ---
 
@@ -24,14 +25,21 @@ intel_ontology_demo/
 │   └── pipeline.py           # 流程编排
 ├── ui/
 │   └── console_view.py       # 合并/分离视图
-└── main.py                   # CLI入口
+├── main.py                   # CLI入口
+└── web_app.py                # Streamlit 前端入口
 ```
 
 ---
 
 ## 快速开始
 
-### 1) 运行默认示例（KAG风格抽取 + 合并视图）
+### 安装依赖
+
+```bash
+pip install -e .
+```
+
+### 1) 运行默认 CLI 示例（KAG风格抽取 + 合并视图）
 
 ```bash
 python -m intel_ontology_demo.main
@@ -55,7 +63,7 @@ python -m intel_ontology_demo.main \
 python -m intel_ontology_demo.main --view split
 ```
 
-### 4) 演示人工编辑本体
+### 4) 演示人工编辑本体（CLI）
 
 ```bash
 python -m intel_ontology_demo.main --edit-demo
@@ -64,6 +72,32 @@ python -m intel_ontology_demo.main --edit-demo
 会在抽取前手工加入：
 - 类：`Operation`
 - 关系：`targets(Organization -> Operation)`
+
+---
+
+## 前端界面（Streamlit）
+
+### 启动方式
+
+```bash
+streamlit run intel_ontology_demo/web_app.py
+```
+
+或使用脚本入口：
+
+```bash
+intel-demo-web
+```
+
+### 前端可做的操作
+
+1. **选择抽取模式**：`kag` / `llm`。
+2. **输入情报文本**，点击“执行抽取并入图”。
+3. **编辑本体**：添加类、添加关系。
+4. **切换展示模式**：
+   - `combined`：本体层与实例层合并展示
+   - `split`：本体层与实例层分栏展示
+5. **重置图谱**：恢复初始化本体。
 
 ---
 
@@ -79,7 +113,7 @@ python -m intel_ontology_demo.main --edit-demo
 
 ## 定位
 
-这个仓库目标是快速验证“动态本体构建 + 双抽取路径 + 双视图展示”的产品原型。
+这个仓库目标是快速验证“动态本体构建 + 双抽取路径 + 双视图展示 + 前端交互”的产品原型。
 如果你要扩展到生产版本，建议优先补齐：
 
 - 抽取质量评估（P/R/F1）
