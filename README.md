@@ -1,37 +1,53 @@
-# 情报系统动态本体构建 Demo（Python）
+# 可持续演化的智能情报知识中枢系统（KAG/OpenSPG Demo）
 
-这是一个可运行的 Python Demo，用于演示：
+这个 Demo 已从“静态图谱演示”升级为“可落地闭环系统原型”，核心闭环：
 
-- 使用 **KAG/OpenSPG 思路** 初始化本体（可替换为真实 KAG SDK）。
-- 在信息抽取后对本体进行 **自动演化**（新类/新关系自动补全）。
-- 提供本体 **人工编辑能力**（手工增加类和关系）。
-- 抽取层支持两种模式：
-  - `kag`：规则化、结构化抽取（模拟 KAG 风格）
-  - `llm`：纯大模型抽取风格（示例用占位实现）
-- 支持 **本体层 + 实例层一起显示** 或 **分开显示**。
-- 提供 **前端界面（Streamlit）**，可视化操作本体编辑、抽取入图、图谱查看。
+> 数据采集 → 本体演化 → 图谱构建（含事件）→ 推理分析 → 决策问答
+
+## 1. 系统四层架构（可直接用于PPT）
+
+### ① 数据采集层
+- 多源接入：新闻/RSS、社交媒体、报告文本（可扩展 API / Scrapy）。
+- 增量更新：按 `doc_id` 去重，只处理新文档。
+- 实现：`DataIngestionService.collect()`。
+
+### ② 语义解析层
+- 双抽取路径：`kag` 规则抽取 + `llm` 风格抽取。
+- 支持实体、关系以及**事件级抽取**（时间、主体、行为、对象、地点、结果）。
+
+### ③ 动态本体层（核心）
+- 本体初始化（情报基础 schema）。
+- 自动本体演化（新类/新关系自动进入 schema）。
+- 本体版本管理（每次结构变更记录版本 + 时间轴，支持回溯基础）。
+
+### ④ 知识图谱与推理应用层
+- 图谱包含：实体节点、关系边、事件子图。
+- 推理：关键人物网络、风险路径。
+- 应用：组织近期活动问答（KG 约束，减少胡编）。
 
 ---
 
-## 目录结构
+## 2. 目录结构
 
 ```text
 intel_ontology_demo/
 ├── adapters/
-│   ├── extractors.py         # KAG风格抽取 + 纯LLM风格抽取
-│   └── kag_adapter.py        # 初始化本体、自动演化、实例入图
+│   ├── extractors.py         # 实体/关系/事件抽取
+│   └── kag_adapter.py        # 本体初始化、自动演化、版本快照、入图
 ├── services/
-│   ├── ontology_editor.py    # 本体手工编辑
-│   └── pipeline.py           # 流程编排
+│   ├── data_ingestion.py     # 多源采集 + 增量去重
+│   ├── ontology_editor.py    # 人工本体编辑
+│   ├── pipeline.py           # 数据->本体->图谱->推理 编排
+│   └── reasoning.py          # 推理与问答
 ├── ui/
-│   └── console_view.py       # 合并/分离视图
+│   └── console_view.py       # 本体/实例/时间轴视图
 ├── main.py                   # CLI入口
 └── web_app.py                # Streamlit 前端入口
 ```
 
 ---
 
-## 快速开始
+## 3. 快速开始
 
 ### 安装依赖
 
@@ -39,83 +55,35 @@ intel_ontology_demo/
 pip install -e .
 ```
 
-### 1) 运行默认 CLI 示例（KAG风格抽取 + 合并视图）
+### CLI 运行
 
 ```bash
-python -m intel_ontology_demo.main
+python -m intel_ontology_demo.main --mode kag
 ```
 
-### 2) 纯大模型风格抽取（触发本体自动演化）
+或 LLM 风格抽取：
 
 ```bash
-python -m intel_ontology_demo.main \
-  --mode llm \
-  --text "drone observed near harbor"
+python -m intel_ontology_demo.main --mode llm --text "2026-04-21: RedGroup deployed DroneX to Harbor"
 ```
 
-该示例会自动演化出：
-- 新类：`Asset`, `StrategicArea`
-- 新关系：`observed_near`
-
-### 3) 分开显示本体层和实例层
-
-```bash
-python -m intel_ontology_demo.main --view split
-```
-
-### 4) 演示人工编辑本体（CLI）
-
-```bash
-python -m intel_ontology_demo.main --edit-demo
-```
-
-会在抽取前手工加入：
-- 类：`Operation`
-- 关系：`targets(Organization -> Operation)`
-
----
-
-## 前端界面（Streamlit）
-
-### 启动方式
+### 前端运行
 
 ```bash
 streamlit run intel_ontology_demo/web_app.py
 ```
 
-或使用脚本入口：
+---
 
-```bash
-intel-demo-web
-```
+## 4. Demo 可展示的“甲方价值点”
 
-### 前端可做的操作
-
-1. **选择抽取模式**：`kag` / `llm`。
-2. **输入情报文本**，点击“执行抽取并入图”。
-3. **编辑本体**：添加类、添加关系。
-4. **切换展示模式**：
-   - `combined`：本体层与实例层合并展示
-   - `split`：本体层与实例层分栏展示
-5. **重置图谱**：恢复初始化本体。
+1. **双视图联看**：Schema（本体）+ Graph（实例/事件）。
+2. **本体演化时间轴**：展示 Day1/Day3/Day5 的类与关系增长。
+3. **完整情报故事线**：从原始文本自动形成事件链与风险路径。
+4. **智能问答**：如“某组织最近活动有哪些？”
 
 ---
 
-## 和真实 KAG/OpenSPG 对接建议
+## 5. 一句话卖点
 
-当前 Demo 为轻量可运行版本，真实项目可按以下替换：
-
-1. 将 `adapters/kag_adapter.py` 中的初始化逻辑改为调用 OpenSPG/KAG 的本体管理 API。
-2. 将 `adapters/extractors.py` 的 `PureLLMExtractor` 改为真实模型调用（OpenAI API/私有部署模型）并解析 JSON 三元组。
-3. 将 `KnowledgeState` 持久化到图数据库（如 NebulaGraph/Neo4j），并增加版本化管理，支持审计与回滚。
-
----
-
-## 定位
-
-这个仓库目标是快速验证“动态本体构建 + 双抽取路径 + 双视图展示 + 前端交互”的产品原型。
-如果你要扩展到生产版本，建议优先补齐：
-
-- 抽取质量评估（P/R/F1）
-- 本体冲突检测与合并策略
-- 人机协同审核流（变更审批）
+本系统构建了一个“可持续演化的本体驱动知识图谱平台”，可在多源情报持续输入下自动扩展知识结构、维护语义一致性，并提供可解释推理与高可信问答支持。
