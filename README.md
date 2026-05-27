@@ -87,3 +87,16 @@ streamlit run intel_ontology_demo/web_app.py
 ## 5. 一句话卖点
 
 本系统构建了一个“可持续演化的本体驱动知识图谱平台”，可在多源情报持续输入下自动扩展知识结构、维护语义一致性，并提供可解释推理与高可信问答支持。
+
+---
+
+## 附：SWaT + KDD 统一复现实验模板
+
+仓库新增 `tsad_template/`，用于快速搭建时间序列异常检测的统一实验：
+
+- 统一数据加载接口：`swat.csv` / `kdd.csv`
+- 统一模型接口：当前内置 `iforest` 基线
+- 统一评测输出：Precision / Recall / F1 / AUPR
+- 统一入口：`python tsad_template/run_experiment.py --dataset swat --model iforest`
+
+详见 `tsad_template_README.md`。
